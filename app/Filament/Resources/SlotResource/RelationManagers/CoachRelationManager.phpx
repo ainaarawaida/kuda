@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Filament\Resources\SlotResource\RelationManagers;
+
+use Filament\Forms;
+use Filament\Tables;
+use App\Models\Coach;
+use Filament\Forms\Form;
+use Filament\Tables\Table;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Tables\Actions\AttachAction;
+use Filament\Tables\Actions\DetachAction;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Filament\Resources\RelationManagers\RelationManager;
+
+class CoachRelationManager extends RelationManager
+{
+    protected static string $relationship = 'coach';
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('post_id')
+                ->mask(function(){
+                    return 'aaaa';
+                }),
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255),
+                    Select::make('rider_id')
+                    ->label('Rider')   
+                    ->relationship('rider', 'name')
+                    ->preload()
+                    ->saveRelationshipsUsing(function ($record, $state) {
+                        $record->rider()->sync($state);
+                    })
+            ]);
+    }
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->recordTitleAttribute('name')
+            ->columns([
+                Tables\Columns\TextColumn::make('name'),
+                Tables\Columns\TextColumn::make('rider.name'),
+            ])
+            ->filters([
+                //
+            ])
+            ->headerActions([
+                // Tables\Actions\AttachAction::make()
+                // ->preloadRecordSelect()
+                // ->form(fn (AttachAction $action): array => [
+                //     $action->getRecordSelect(),
+                //     Select::make('rider')
+                //     ->relationship('rider', 'name')
+                //     ->preload(),
+                // ])
+                // ->preloadRecordSelect(),
+                //    ->form([
+                //     Select::make('rider_id')
+                //     ->relationship('rider', 'name')
+                //     ->preload()
+                // ]),
+            ])
+            ->actions([
+                Tables\Actions\EditAction::make(),
+                // ->form([
+                //     Select::make('rider_id')
+                //     ->relationship('rider', 'name')
+                //     ->preload()
+                // ]),
+                DetachAction::make(),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    // Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}

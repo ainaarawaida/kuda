@@ -1,0 +1,8 @@
+php artisan make:model Coach --migration
+php artisan make:migration create_coaches_table --create=coaches
+php artisan migrate
+php artisan migrate:fresh --seed
+php artisan migrate:rollback
+
+php artisan make:filament-user
+php artisan make:filament-resource Coach --generate --soft-deletes
